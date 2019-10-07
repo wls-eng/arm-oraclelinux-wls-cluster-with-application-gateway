@@ -47,7 +47,7 @@
     "appGatewaySSLCertificateData": {
             "reference": {
                 "keyVault": {
-                    "id": "/subscriptions/{subscriptionid}/resourceGroups/{subscriptionid}/providers/Microsoft.KeyVault/vaults/myKeyVault4Cert"
+                    "id": "/subscriptions/{subscriptionid}/resourceGroups/{resourcegroupid}/providers/Microsoft.KeyVault/vaults/myKeyVault4Cert"
                 },
                 "secretName": "myCertSecretData"
             }
