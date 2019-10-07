@@ -36,16 +36,29 @@
       "value": "GEN-UNIQUE"
     },
     "numberOfInstances": {
-      "value": "GEN-UNIQUE"    
-    },
-    "adminVMName": {
-      "value": "GEN-UNIQUE"        
+      "value": "GEN-UNIQUE"
     },
     "dnsNameforApplicationGateway": {
       "value": "GEN-UNIQUE"
     },
     "GatewayPublicIPAddressName": {
       "value": "GEN-UNIQUE"
-    }
+    },
+    "appGatewaySSLCertificateData": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/{subscriptionid}/resourceGroups/{subscriptionid}/providers/Microsoft.KeyVault/vaults/myKeyVault4Cert"
+                },
+                "secretName": "myCertSecretData"
+            }
+        },
+    "appGatewaySSLCertificatePassword": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/{subscriptionid}/resourceGroups/{resourcegroupid}/providers/Microsoft.KeyVault/vaults/myKeyVault4Cert"
+                },
+                "secretName": "myCertSecretPassword"
+            }
+        }
   }
 }
