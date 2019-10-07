@@ -135,6 +135,25 @@
             "metadata": {
                 "description": "Select appropriate VM Size as per requirement (Standard_A1, Standard_A2, Standard_A3, Standard_A4)"
             }
+        },
+        "KeyVaultName": {
+             "type":"string",
+             "defaultValue":"myKeyVault4Cert",
+             "metadata":{
+                "description": "KeyVault Name"
+             }
+         },
+        "appGatewaySSLCertificateData": {
+            "type": "string",
+            "metadata": {
+                "description": "SSL Certificate Data for Application Gateway"
+            }
+        },
+        "appGatewaySSLCertificatePassword": {
+            "type": "string",
+            "metadata": {
+                "description": "SSL Certificate Data for Application Gateway"
+            }
         }
     },
     "variables": {
@@ -163,7 +182,7 @@
         "appGatewaySubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('appGatewaySubnetName'))]",
         "appGatewayPublicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('GatewayPublicIPAddressName'))]",
         "appGatewayFrontEndHTTPPort": 80,
-        "appGatewayFrontEndHTTPSPort": 443,
+        "appGatewayFrontEndHTTPSPort": 443,        
         "backendPort": 8001,
         "availabilitySetId": {
             "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
@@ -360,6 +379,15 @@
                         "type": "Microsoft.Network/applicationGateways/frontendPorts"
                     }
                 ],
+                "sslCertificates": [
+                    {
+                        "name": "appGwSslCertificate",
+                        "properties": {
+                            "data": "[parameters('appGatewaySSLCertificateData')]",
+                            "password": "[parameters('appGatewaySSLCertificatePassword')]"
+                        }
+                    }
+                ],
                 "backendAddressPools": [
                     {
                         "name": "myGatewayBackendPool",
@@ -407,7 +435,25 @@
                             "requireServerNameIndication": false
                         },
                         "type": "Microsoft.Network/applicationGateways/httpListeners"
+                    },
+                    {
+                        "name": "HTTPSListener",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/frontendIPConfigurations/appGwPublicFrontendIp')]"
+                            },
+                            "frontendPort": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/frontendPorts/https_port')]"
+                            },
+                            "protocol": "Https",
+                            "requireServerNameIndication": false,
+                            "SslCertificate": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/sslCertificates/appGwSslCertificate')]"
+                            }
+                        },
+                        "type": "Microsoft.Network/applicationGateways/httpListeners"
                     }
+                    
                 ],
                 "urlPathMaps": [],
                 "requestRoutingRules": [
@@ -417,6 +463,22 @@
                             "ruleType": "Basic",
                             "httpListener": {
                                 "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/httpListeners/HTTPListener')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/backendAddressPools/myGatewayBackendPool')]"
+                            },
+                            "backendHttpSettings": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/backendHttpSettingsCollection/myHTTPSetting')]"
+                            }
+                        },
+                        "type": "Microsoft.Network/applicationGateways/requestRoutingRules"
+                    },
+                    {
+                        "name": "HTTPSRoutingRule",
+                        "properties": {
+                            "ruleType": "Basic",
+                            "httpListener": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/httpListeners/HTTPSListener')]"
                             },
                             "backendAddressPool": {
                                 "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName')), '/backendAddressPools/myGatewayBackendPool')]"
