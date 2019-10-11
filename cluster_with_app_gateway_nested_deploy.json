@@ -7,7 +7,7 @@
 			"metadata": {
 				"description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
 			},
-			"defaultValue": "https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-cluster-with-application-gateway/develop/"
+			"defaultValue": "https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-cluster-with-application-gateway/master/"
 		},
 		"adminUsername": {
 			"type": "string",
@@ -630,7 +630,7 @@
 				"autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": [
-						"https://raw.githubusercontent.com/gnsuryan/arm-oraclelinux-wls-cluster-with-application-gateway/develop/setupClusterDomain.sh"
+						"https://raw.githubusercontent.com/gnsuryan/arm-oraclelinux-wls-cluster-with-application-gateway/master/setupClusterDomain.sh"
 					],
 					"commandToExecute": "[concat('sh setupClusterDomain.sh',' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ','admin',' ',variables('adminVMName'),' ',reference(parameters('GatewayPublicIPAddressName')).dnsSettings.fqdn)]"
 				}
@@ -656,7 +656,7 @@
 				"autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": [
-						"https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-cluster-with-application-gateway/develop/setupClusterDomain.sh"
+						"https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-cluster-with-application-gateway/master/setupClusterDomain.sh"
 					],
 					"commandToExecute": "[concat('sh setupClusterDomain.sh',' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',concat(parameters('managedServerPrefix'),copyIndex()),' ',variables('adminVMName'),' ',reference(parameters('GatewayPublicIPAddressName')).dnsSettings.fqdn)]"
 				}
