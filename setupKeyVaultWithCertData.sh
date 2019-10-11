@@ -2,18 +2,19 @@
 
 function usage()
 {
-  echo "$0 <resourceGroupName> <pathToCertificateFile> <certificatePassword>"
-  ex: $0 test-rg /home/testuser/certificate.pfx Azure123456!
+  echo "$0 <resourceGroupName> <keyVaultName> <pathToCertificateFile> <certificatePassword>"
+  echo "ex: $0 test-rg myKeyVault4Cert /home/testuser/certificate.pfx Azure123456!"
+  exit 1
 }
 
 resourceGrpName=$1
-pathToCertFile=$2
-certPassword=$3
+keyVaultName=$2
+pathToCertFile=$3
+certPassword=$4
 
-if [ "$#" -ne 3 ];
+if [ "$#" -ne 4 ];
 then
-usage()
- exit 1
+  usage
 fi
 
 if [ ! -f "$pathToCertFile" ];
@@ -23,12 +24,19 @@ then
  exit 1
 fi
 
-az keyvault create --name "myKeyVault4Cert" --resource-group $resourceGrpName  --location southeastasia
+echo "Creating Key Vault..."
+az keyvault create --name $keyVaultName --resource-group $resourceGrpName  --location southeastasia
 
-az keyvault update --name "myKeyVault4Cert" --resource-group resourceGrpName --enabled-for-deployment "true"
+echo "Enabling Deployment on Key Vault ..."
+az keyvault update --name $keyVaultName --resource-group $resourceGrpName --enabled-for-deployment "true"
 
-az keyvault update --name "myKeyVault4Cert" --resource-group resourceGrpName --enabled-for-template-deployment "true"
+echo "Enabling Template Deployment on Key Vault ..."
+az keyvault update --name $keyVaultName --resource-group $resourceGrpName --enabled-for-template-deployment "true"
 
-az keyvault secret set --vault-name myKeyVault4Cert --encoding base64 --description text/plain --name myCertSecretData --file $pathToCertFile
+echo "Setting Secret myCertSecretData on Key Vault ..."
+az keyvault secret set --vault-name $keyVaultName --encoding base64 --description text/plain --name myCertSecretData --file $pathToCertFile
 
-az keyvault secret set --vault-name myKeyVault4Cert --name myCertSecretPassword --value $certPassword
+echo "Setting Secret myCertSecretPassword on Key Vault ..."
+az keyvault secret set --vault-name $keyVaultName --name myCertSecretPassword --value $certPassword
+
+echo "Completed."
