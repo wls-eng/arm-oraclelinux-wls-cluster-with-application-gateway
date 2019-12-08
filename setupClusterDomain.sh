@@ -19,6 +19,7 @@ function setupInstallPath()
     WLS_PATH="/u01/app/wls"
     DOMAIN_PATH="/u01/domains"
     DOMAIN_DIR=$DOMAIN_PATH/$wlsDomainName
+    WL_HOME="/u01/app/wls/install/Oracle/Middleware/Oracle_Home/wlserver"
 
     #create custom directory for setting up wls and jdk
     sudo mkdir -p $JDK_PATH
@@ -61,6 +62,58 @@ function addOracleGroupAndUser()
     USER_GROUP=${groupname}
     sudo groupadd $groupname
     sudo useradd -d ${user_home_dir} -g $groupname $username
+}
+
+#download 3rd Party JDBC Drivers
+function downloadJDBCDrivers()
+{
+   echo "Downloading JDBC Drivers..."
+
+   echo "Downloading postgresql Driver..."
+   downloadUsingWget ${POSTGRESQL_JDBC_DRIVER_URL}
+
+   echo "Downloading mssql Driver"
+   downloadUsingWget ${MSSQL_JDBC_DRIVER_URL}
+
+   echo "JDBC Drivers Downloaded Completed Successfully."
+}
+
+function downloadUsingWget()
+{
+   downloadURL=$1
+   filename=${downloadURL##*/}
+   for in in {1..5}
+   do
+     wget $downloadURL
+     if [ $? != 0 ];
+     then
+        echo "$filename Driver Download failed on $downloadURL. Trying again..."
+	rm -f $filename
+     else 
+        echo "$filename Driver Downloaded successfully"
+        break
+     fi
+   done
+}
+
+function copyJDBCDriversToWeblogicClassPath()
+{
+     echo "Copying JDBC Drivers to Weblogic CLASSPATH ..."
+     sudo cp $BASE_DIR/${POSTGRESQL_JDBC_DRIVER} ${WL_HOME}/server/lib/
+     sudo cp $BASE_DIR/${MSSQL_JDBC_DRIVER} ${WL_HOME}/server/lib/
+
+     chown $username:$groupname ${WL_HOME}/server/lib/${POSTGRESQL_JDBC_DRIVER}
+     chown $username:$groupname ${WL_HOME}/server/lib/${MSSQL_JDBC_DRIVER}
+
+     echo "Copied JDBC Drivers to Weblogic CLASSPATH"
+}
+
+function modifyWLSClasspath()
+{
+  echo "Modify WLS CLASSPATH ...."
+  sed -i 's;^WEBLOGIC_CLASSPATH=\"${JAVA_HOME}.*;&\nWEBLOGIC_CLASSPATH="${WL_HOME}/server/lib/postgresql-42.2.8.jar:${WL_HOME}/server/lib/mssql-jdbc-7.4.1.jre8.jar:${WEBLOGIC_CLASSPATH}";' ${WL_HOME}/../oracle_common/common/bin/commExtEnv.sh
+  sed -i 's;^WEBLOGIC_CLASSPATH=\"${JAVA_HOME}.*;&\n\n#**WLSAZURECUSTOMSCRIPTEXTENSION** Including Postgresql and MSSSQL JDBC Drivers in Weblogic Classpath;' ${WL_HOME}/../oracle_common/common/bin/commExtEnv.sh
+  echo "Modified WLS CLASSPATH."
 }
 
 function validateInput()
@@ -223,6 +276,9 @@ function cleanup()
 
     rm -rf $JDK_PATH/jdk-8u131-linux-x64.tar.gz
     rm -rf $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+    
+    rm -rf $BASE_DIR/${POSTGRESQL_JDBC_DRIVER}
+    rm -rf $BASE_DIR/${MSSQL_JDBC_DRIVER}    
 
     rm -rf $WLS_PATH/silent-template
 
@@ -814,6 +870,12 @@ export nmHost=`hostname`
 export nmPort=5556
 export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.1.1/weblogic-deploy.zip
 
+export POSTGRESQL_JDBC_DRIVER_URL=https://jdbc.postgresql.org/download/postgresql-42.2.8.jar 
+export POSTGRESQL_JDBC_DRIVER=${POSTGRESQL_JDBC_DRIVER_URL##*/}
+
+export MSSQL_JDBC_DRIVER_URL=https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar
+export MSSQL_JDBC_DRIVER=${MSSQL_JDBC_DRIVER_URL##*/}
+
 addOracleGroupAndUser
 
 cleanup
@@ -833,6 +895,12 @@ setupJDK
 setupWLS
 
 installWLS
+
+downloadJDBCDrivers
+
+copyJDBCDriversToWeblogicClassPath
+
+modifyWLSClasspath
 
 if [ $wlsServerName == "admin" ];
 then
