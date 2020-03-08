@@ -630,7 +630,7 @@
 				"autoUpgradeMinorVersion": true,
 				"settings": {
 					"fileUris": [
-						"https://raw.githubusercontent.com/gnsuryan/arm-oraclelinux-wls-cluster-with-application-gateway/master/setupClusterDomain.sh"
+						"https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-cluster-with-application-gateway/master/setupClusterDomain.sh"
 					],
 					"commandToExecute": "[concat('sh setupClusterDomain.sh',' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ','admin',' ',variables('adminVMName'),' ',reference(parameters('GatewayPublicIPAddressName')).dnsSettings.fqdn)]"
 				}
